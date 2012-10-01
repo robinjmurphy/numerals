@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="numerals" default="compile">
+
+	<property name="build.dir" location="build" />
+	<property name="classes.dir" location="${build.dir}/classes" />
+	<property name="test.dir" location="${build.dir}/test" />
+	<property name="report.dir" location="${build.dir}/testreports" />
+
+	<path id="lib.classpath">
+		<fileset dir="lib" includes="**/*.jar" excludes="**/*-src.jar" />
+	</path>
+
+	<target name="clean" description="delete build directory">
+		<delete dir="${build.dir}" />
+		<delete dir="${classes.dir}" />
+		<delete dir="${report.dir}" />
+	</target>
+
+	<target name="compile" description="Compile java code">
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${classes.dir}" />
+		<javac srcdir="src" destdir="${classes.dir}" />
+	</target>
+
+	<target name="compile-unit-tests" description="Compile unit tests"
+		depends="compile">
+
+		<mkdir dir="${test.dir}" />
+		<javac srcdir="unit-test" destdir="${test.dir}">
+			<classpath>
+				<path refid="lib.classpath" />
+				<path path="${classes.dir}" />
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="run-unit-tests" depends="compile-unit-tests"
+		description="Run unit tests">
+		<delete dir="${report.dir}" />
+		<mkdir dir="${report.dir}" />
+		<junit haltonerror="true" printsummary="yes">
+			<formatter type="xml" />
+			<classpath>
+				<path refid="lib.classpath" />
+				<path path="${classes.dir}" />
+				<path path="${test.dir}" />
+			</classpath>
+			<batchtest fork="yes" todir="${report.dir}">
+				<fileset dir="unit-test">
+					<include name="**/*.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+
+	</target>
+
+	<target name="junit-report" depends="run-unit-tests" description="Create test reports">
+		<junitreport todir="${report.dir}">
+			<fileset dir="$report.dir" includes="*.xml" />
+			<report todir="${report.dir}" />
+		</junitreport>
+	</target>
+
+</project>
